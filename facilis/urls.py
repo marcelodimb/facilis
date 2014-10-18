@@ -5,7 +5,6 @@ from django.views.generic.base import RedirectView
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
     url(r'^$', RedirectView.as_view(url='/admin')),
     url(r'^admin/', include(admin.site.urls)),
 )

@@ -8,68 +8,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Assunto'
-        db.create_table(u'sap_assunto', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('nome', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
-        ))
-        db.send_create_signal(u'sap', ['Assunto'])
 
-        # Adding model 'Inspetoria'
-        db.create_table(u'sap_inspetoria', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('nome', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
-        ))
-        db.send_create_signal(u'sap', ['Inspetoria'])
-
-        # Adding model 'Situacao'
-        db.create_table(u'sap_situacao', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('nome', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
-        ))
-        db.send_create_signal(u'sap', ['Situacao'])
-
-        # Adding model 'Procedimento'
-        db.create_table(u'sap_procedimento', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('interessado', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
-            ('email', self.gf('django.db.models.fields.EmailField')(max_length=128, unique=True, null=True, blank=True)),
-            ('telefone', self.gf('django.db.models.fields.CharField')(max_length=11, null=True, blank=True)),
-            ('assunto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Assunto'])),
-            ('situacao', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['sap.Situacao'])),
-            ('auditor_responsavel', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-            ('observacoes', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('data_de_abertura', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
-            ('modificado_em', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
-        ))
-        db.send_create_signal(u'sap', ['Procedimento'])
-
-        # Adding model 'Exigencia'
-        db.create_table(u'sap_exigencia', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('procedimento', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Procedimento'])),
-            ('conteudo', self.gf('django.db.models.fields.CharField')(max_length=256, null=True, blank=True)),
-            ('atendida', self.gf('django.db.models.fields.BooleanField')()),
-        ))
-        db.send_create_signal(u'sap', ['Exigencia'])
-
+        # Changing field 'Exigencia.conteudo'
+        db.alter_column(u'sap_exigencia', 'conteudo', self.gf('django.db.models.fields.TextField')(null=True))
 
     def backwards(self, orm):
-        # Deleting model 'Assunto'
-        db.delete_table(u'sap_assunto')
 
-        # Deleting model 'Inspetoria'
-        db.delete_table(u'sap_inspetoria')
-
-        # Deleting model 'Situacao'
-        db.delete_table(u'sap_situacao')
-
-        # Deleting model 'Procedimento'
-        db.delete_table(u'sap_procedimento')
-
-        # Deleting model 'Exigencia'
-        db.delete_table(u'sap_exigencia')
-
+        # Changing field 'Exigencia.conteudo'
+        db.alter_column(u'sap_exigencia', 'conteudo', self.gf('django.db.models.fields.CharField')(max_length=256, null=True))
 
     models = {
         u'auth.group': {
@@ -116,7 +62,7 @@ class Migration(SchemaMigration):
         u'sap.exigencia': {
             'Meta': {'object_name': 'Exigencia'},
             'atendida': ('django.db.models.fields.BooleanField', [], {}),
-            'conteudo': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
+            'conteudo': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'procedimento': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Procedimento']"})
         },
