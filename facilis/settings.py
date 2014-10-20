@@ -74,7 +74,7 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
 SUIT_CONFIG = {
     # header
     'ADMIN_NAME': 'Facilis',
-    'HEADER_DATE_FORMAT': 'l, j F, Y',
+    'HEADER_DATE_FORMAT': 'l, j \d\e F \d\e Y',
 
     # menu
     'SEARCH_URL': '',
