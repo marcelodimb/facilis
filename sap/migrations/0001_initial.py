@@ -32,14 +32,20 @@ class Migration(SchemaMigration):
         # Adding model 'Procedimento'
         db.create_table(u'sap_procedimento', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('interessado', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
+            ('nome_parte', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
             ('email', self.gf('django.db.models.fields.EmailField')(max_length=128, unique=True, null=True, blank=True)),
-            ('telefone', self.gf('django.db.models.fields.CharField')(max_length=11, null=True, blank=True)),
+            ('telefone_fixo', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
+            ('telefone_celular', self.gf('django.db.models.fields.CharField')(max_length=11, null=True, blank=True)),
+            ('tipo_documento', self.gf('django.db.models.fields.IntegerField')(max_length=1)),
+            ('tipo_documento_conteudo', self.gf('django.db.models.fields.CharField')(max_length=14)),
             ('assunto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Assunto'])),
             ('situacao', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['sap.Situacao'])),
-            ('auditor_responsavel', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('auditor_responsavel', self.gf('django.db.models.fields.related.ForeignKey')(related_name='user_auditor_responsavel', to=orm['auth.User'])),
             ('observacoes', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('data_de_abertura', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
+            ('inspetoria', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Inspetoria'])),
+            ('criado_por', self.gf('django.db.models.fields.related.ForeignKey')(related_name='user_criado_por', null=True, to=orm['auth.User'])),
+            ('modificado_por', self.gf('django.db.models.fields.related.ForeignKey')(related_name='user_modificado_por', null=True, to=orm['auth.User'])),
+            ('criado_em', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
             ('modificado_em', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
         ))
         db.send_create_signal(u'sap', ['Procedimento'])
@@ -48,10 +54,34 @@ class Migration(SchemaMigration):
         db.create_table(u'sap_exigencia', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('procedimento', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Procedimento'])),
-            ('conteudo', self.gf('django.db.models.fields.CharField')(max_length=256, null=True, blank=True)),
+            ('conteudo', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('atendida', self.gf('django.db.models.fields.BooleanField')()),
         ))
         db.send_create_signal(u'sap', ['Exigencia'])
+
+        # Adding model 'Usuario_Inspetoria'
+        db.create_table(u'sap_usuario_inspetoria', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['auth.User'], unique=True)),
+            ('inspetoria', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Inspetoria'])),
+        ))
+        db.send_create_signal(u'sap', ['Usuario_Inspetoria'])
+
+        # Adding model 'GrupoTrabalho'
+        db.create_table(u'sap_grupotrabalho', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('nome', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
+            ('assunto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Assunto'])),
+        ))
+        db.send_create_signal(u'sap', ['GrupoTrabalho'])
+
+        # Adding model 'GrupoTrabalhoAuditor'
+        db.create_table(u'sap_grupotrabalhoauditor', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('grupo_trabalho', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.GrupoTrabalho'])),
+            ('auditor', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+        ))
+        db.send_create_signal(u'sap', ['GrupoTrabalhoAuditor'])
 
 
     def backwards(self, orm):
@@ -69,6 +99,15 @@ class Migration(SchemaMigration):
 
         # Deleting model 'Exigencia'
         db.delete_table(u'sap_exigencia')
+
+        # Deleting model 'Usuario_Inspetoria'
+        db.delete_table(u'sap_usuario_inspetoria')
+
+        # Deleting model 'GrupoTrabalho'
+        db.delete_table(u'sap_grupotrabalho')
+
+        # Deleting model 'GrupoTrabalhoAuditor'
+        db.delete_table(u'sap_grupotrabalhoauditor')
 
 
     models = {
@@ -116,9 +155,21 @@ class Migration(SchemaMigration):
         u'sap.exigencia': {
             'Meta': {'object_name': 'Exigencia'},
             'atendida': ('django.db.models.fields.BooleanField', [], {}),
-            'conteudo': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
+            'conteudo': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'procedimento': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Procedimento']"})
+        },
+        u'sap.grupotrabalho': {
+            'Meta': {'object_name': 'GrupoTrabalho'},
+            'assunto': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Assunto']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'})
+        },
+        u'sap.grupotrabalhoauditor': {
+            'Meta': {'object_name': 'GrupoTrabalhoAuditor'},
+            'auditor': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
+            'grupo_trabalho': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.GrupoTrabalho']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         u'sap.inspetoria': {
             'Meta': {'object_name': 'Inspetoria'},
@@ -128,20 +179,32 @@ class Migration(SchemaMigration):
         u'sap.procedimento': {
             'Meta': {'object_name': 'Procedimento'},
             'assunto': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Assunto']"}),
-            'auditor_responsavel': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']"}),
-            'data_de_abertura': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
+            'auditor_responsavel': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'user_auditor_responsavel'", 'to': u"orm['auth.User']"}),
+            'criado_em': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
+            'criado_por': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'user_criado_por'", 'null': 'True', 'to': u"orm['auth.User']"}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '128', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'interessado': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'}),
+            'inspetoria': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Inspetoria']"}),
             'modificado_em': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
+            'modificado_por': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'user_modificado_por'", 'null': 'True', 'to': u"orm['auth.User']"}),
+            'nome_parte': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'}),
             'observacoes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'situacao': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': u"orm['sap.Situacao']"}),
-            'telefone': ('django.db.models.fields.CharField', [], {'max_length': '11', 'null': 'True', 'blank': 'True'})
+            'telefone_celular': ('django.db.models.fields.CharField', [], {'max_length': '11', 'null': 'True', 'blank': 'True'}),
+            'telefone_fixo': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
+            'tipo_documento': ('django.db.models.fields.IntegerField', [], {'max_length': '1'}),
+            'tipo_documento_conteudo': ('django.db.models.fields.CharField', [], {'max_length': '14'})
         },
         u'sap.situacao': {
             'Meta': {'object_name': 'Situacao'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'})
+        },
+        u'sap.usuario_inspetoria': {
+            'Meta': {'object_name': 'Usuario_Inspetoria'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'inspetoria': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Inspetoria']"}),
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
         }
     }
 
