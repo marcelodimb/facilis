@@ -7,24 +7,24 @@ from .forms import ExigenciaForm, GrupoTrabalhoAuditorForm, ProcedimentoForm
 
 
 class AssuntoAdmin(admin.ModelAdmin):
-    list_display = ['nome']
-    list_display_links = ['nome']
-    ordering = ['nome']
-    search_fields = ['nome']
+    list_display = ('nome',)
+    list_display_links = ('nome',)
+    ordering = ('nome',)
+    search_fields = ('nome',)
 
 
 class InspetoriaAdmin(admin.ModelAdmin):
-    list_display = ['nome']
-    list_display_links = ['nome']
-    ordering = ['nome']
-    search_fields = ['nome']
+    list_display = ('nome',)
+    list_display_links = ('nome',)
+    ordering = ('nome',)
+    search_fields = ('nome',)
 
 
 class SituacaoAdmin(admin.ModelAdmin):
-    list_display = ['nome']
-    list_display_links = ['nome']
-    ordering = ['nome']
-    search_fields = ['nome']
+    list_display = ('nome',)
+    list_display_links = ('nome',)
+    ordering = ('nome',)
+    search_fields = ('nome',)
 
 
 class ExigenciaInline(admin.StackedInline):
@@ -97,7 +97,12 @@ class ProcedimentoAdmin(admin.ModelAdmin):
 
     # Redefine o método de salvar para incluir o usuario que atualizou o último procedimento
     def save_model(self, request, obj, form, change):
+        # Verifica se o usuario informou alguma exigencia e altera a situacao
+        if request.POST['exigencia_set-0-conteudo']:
+            obj.situacao = Situacao.objects.get(id=2)
+
         u = User.objects.get(username=request.user.username)
+
         inspetoria = u.usuario_inspetoria.inspetoria
         obj.inspetoria = inspetoria
 
