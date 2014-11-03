@@ -4,7 +4,7 @@
     <data-source source="LOCAL" name="Django default" uuid="ddf8b84b-8d8d-415e-9c24-501626e2f3ae">
       <driver-ref>sqlite.xerial</driver-ref>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\marcelo\precise32\www\facilis\storage.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\Aline\precise32\www\facilis\storage.db</jdbc-url>
       <libraries>
         <library>
           <url>file://$USER_HOME$/.PyCharm30/config/jdbc-drivers/xerial-sqlite-license.txt</url>

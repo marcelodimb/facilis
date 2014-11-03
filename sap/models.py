@@ -35,12 +35,12 @@ class Situacao(models.Model):
 class Procedimento(models.Model):
     nome_parte = models.CharField(max_length=128, unique=True, verbose_name="Nome da parte")
     email = models.EmailField(max_length=128, unique=True, null=True, blank=True)
-    telefone_fixo = models.CharField(max_length=10, null=True, blank=True)
-    telefone_celular = models.CharField(max_length=11, null=True, blank=True)
-    tipo_documento = models.IntegerField(max_length=1)
+    telefone_fixo = models.CharField(max_length=13, null=True, blank=True, help_text="Informe apenas números")
+    telefone_celular = models.CharField(max_length=14, null=True, blank=True, help_text="Informe apenas números")
+    tipo_documento = models.IntegerField(max_length=1, verbose_name="Tipo de documento")
     tipo_documento_conteudo = models.CharField(max_length=18, verbose_name="", help_text="Informe apenas números")
     assunto = models.ForeignKey(Assunto)
-    situacao = models.ForeignKey(Situacao, default=1)
+    situacao = models.ForeignKey(Situacao, default=1, verbose_name="Situação")
     auditor_responsavel = models.ForeignKey(User, verbose_name="Auditor responsável", related_name="user_auditor_responsavel")
     observacoes = models.TextField(null=True, blank=True, verbose_name="Observações")
     inspetoria = models.ForeignKey(Inspetoria, editable=False)
@@ -71,12 +71,13 @@ class Procedimento(models.Model):
 class Exigencia(models.Model):
     procedimento = models.ForeignKey(Procedimento)
     conteudo = models.TextField(null=True, blank=True, verbose_name="Conteúdo")
-    atendida = models.BooleanField(blank=True)
+    atendida = models.BooleanField(blank=True, default=False)
 
     def __unicode__(self):
         return self.conteudo
 
     class Meta:
+        verbose_name = "exigência"
         verbose_name_plural = "exigências"
 
 

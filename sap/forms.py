@@ -43,7 +43,7 @@ class ExigenciaForm(ModelForm):
     class Meta:
         model = Exigencia
         widgets = {
-            'conteudo': AutosizedTextarea(attrs={'rows': 3, 'class': 'input-xxlarge'})
+            'conteudo': AutosizedTextarea(attrs={'rows': 1, 'class': 'input-xxlarge'})
         }
 
 

@@ -34,10 +34,10 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('nome_parte', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
             ('email', self.gf('django.db.models.fields.EmailField')(max_length=128, unique=True, null=True, blank=True)),
-            ('telefone_fixo', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
-            ('telefone_celular', self.gf('django.db.models.fields.CharField')(max_length=11, null=True, blank=True)),
+            ('telefone_fixo', self.gf('django.db.models.fields.CharField')(max_length=13, null=True, blank=True)),
+            ('telefone_celular', self.gf('django.db.models.fields.CharField')(max_length=14, null=True, blank=True)),
             ('tipo_documento', self.gf('django.db.models.fields.IntegerField')(max_length=1)),
-            ('tipo_documento_conteudo', self.gf('django.db.models.fields.CharField')(max_length=14)),
+            ('tipo_documento_conteudo', self.gf('django.db.models.fields.CharField')(max_length=18)),
             ('assunto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Assunto'])),
             ('situacao', self.gf('django.db.models.fields.related.ForeignKey')(default=1, to=orm['sap.Situacao'])),
             ('auditor_responsavel', self.gf('django.db.models.fields.related.ForeignKey')(related_name='user_auditor_responsavel', to=orm['auth.User'])),
@@ -190,10 +190,10 @@ class Migration(SchemaMigration):
             'nome_parte': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'}),
             'observacoes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'situacao': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': u"orm['sap.Situacao']"}),
-            'telefone_celular': ('django.db.models.fields.CharField', [], {'max_length': '11', 'null': 'True', 'blank': 'True'}),
-            'telefone_fixo': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
+            'telefone_celular': ('django.db.models.fields.CharField', [], {'max_length': '14', 'null': 'True', 'blank': 'True'}),
+            'telefone_fixo': ('django.db.models.fields.CharField', [], {'max_length': '13', 'null': 'True', 'blank': 'True'}),
             'tipo_documento': ('django.db.models.fields.IntegerField', [], {'max_length': '1'}),
-            'tipo_documento_conteudo': ('django.db.models.fields.CharField', [], {'max_length': '14'})
+            'tipo_documento_conteudo': ('django.db.models.fields.CharField', [], {'max_length': '18'})
         },
         u'sap.situacao': {
             'Meta': {'object_name': 'Situacao'},

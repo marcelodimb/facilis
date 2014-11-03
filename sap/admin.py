@@ -30,12 +30,27 @@ class SituacaoAdmin(admin.ModelAdmin):
 class ExigenciaInline(admin.StackedInline):
     model = Exigencia
     form = ExigenciaForm
-    extra = 1
-    fieldsets = (
-        (None, {
-            'fields': ('conteudo', 'atendida')
-        }),
-    )
+    extra = 0
+
+    def get_fieldsets(self, request, obj=None):
+        def if_editing(*args):
+            if "atendida" in args:
+                try:
+                    obj = Exigencia.objects.get(procedimento=int(request.path.split('/')[4]))
+                except:
+                    obj = False
+                    pass
+
+            return args if obj else ()
+        return (
+            (None, {
+                'classes': ('wide',),
+                'fields': (
+                    'conteudo',
+                    if_editing('atendida',),
+                )
+            }),
+        )
 
 
 class GrupoTrabalhoAuditorInline(admin.StackedInline):
@@ -61,27 +76,56 @@ class GrupoTrabalhoAdmin(admin.ModelAdmin):
 
 class ProcedimentoAdmin(admin.ModelAdmin):
     form = ProcedimentoForm
-    fieldsets = (
-        (None, {
-            'fields': (
-                'nome_parte',
-                'email',
-                'telefone_fixo',
-                'telefone_celular',
-                ('tipo_documento', 'tipo_documento_conteudo'),
-                'assunto',
-                'situacao',
-                'auditor_responsavel',
-                'observacoes',
-            )
-        }),
-    )
+
+    def get_fieldsets(self, request, obj=None):
+        def if_editing(*args):
+            # Trata da exibicao do campo situacao
+            if "situacao" in args:
+                # Confere se o procedimento é novo ou está sendo editado
+                if obj:
+                    try:
+                        u = User.objects.get(username=request.user.username)
+
+                        # Confere se o usuario é auditor para exibir a situacao
+                        if u.groups.filter(id=1).exists():
+                            r = True
+                        else:
+                            r = False
+                    except:
+                        r = False
+                        pass
+                    return args if r else ()
+
+            return args if obj else ()
+
+        return (
+            (None, {
+                'classes': ('wide',),
+                'fields': (
+                    'nome_parte',
+                    'email',
+                    'telefone_fixo',
+                    'telefone_celular',
+                    ('tipo_documento', 'tipo_documento_conteudo'),
+                    'assunto',
+                    if_editing('situacao',),
+                    'auditor_responsavel',
+                    'observacoes',
+                )
+            }),
+        )
     list_display = ('display_id', 'nome_parte', 'auditor_responsavel', 'situacao', 'display_criado_em',)
     list_display_links = ('display_id', 'nome_parte', 'auditor_responsavel', 'situacao', 'display_criado_em',)
     list_filter = ('criado_em', 'modificado_em', 'situacao',)
-    ordering = ('nome_parte', 'auditor_responsavel', 'situacao', 'criado_em',)
+    ordering = ('-id', 'nome_parte', 'auditor_responsavel', 'situacao', '-criado_em',)
     search_fields = ('nome_parte',)
     inlines = (ExigenciaInline,)
+
+    class Media:
+        js = (
+            'admin/js/jquery.mask.min.js',
+            'admin/js/scripts.js',
+        )
 
     # Redefine a consulta padrão para exibir apenas os procesimentos referentes à inspetoria pertencente do usuário
     def queryset(self, request):
@@ -97,12 +141,32 @@ class ProcedimentoAdmin(admin.ModelAdmin):
 
     # Redefine o método de salvar para incluir o usuario que atualizou o último procedimento
     def save_model(self, request, obj, form, change):
-        # Verifica se o usuario informou alguma exigencia e altera a situacao
-        if request.POST['exigencia_set-0-conteudo']:
+        def has_exigencia(request):
+            has_conteudo = False
+            deleted_exigencias = 0
+            initial_forms = int(request.POST['exigencia_set-INITIAL_FORMS'])
+            total_forms   = int(request.POST['exigencia_set-TOTAL_FORMS'])
+
+            # Checa quantos elementos foram solicitados para serem apagados
+            for i in range(initial_forms):
+                if ("exigencia_set-%s-DELETE" % i) in request.POST:
+                    deleted_exigencias += 1
+
+            # Checa se o conteudo de alguma exigência está vazia
+            for i in range(initial_forms, total_forms):
+                if request.POST[("exigencia_set-%s-conteudo" % i)] != '':
+                    has_conteudo = True
+
+            return has_conteudo or (initial_forms > deleted_exigencias)
+
+        # Verifica se o usuario informou alguma exigencia e altera a
+        # situação para 'Em exigência' ou 'Em análise' caso contrário
+        if has_exigencia(request):
             obj.situacao = Situacao.objects.get(id=2)
+        else:
+            obj.situacao = Situacao.objects.get(id=1)
 
         u = User.objects.get(username=request.user.username)
-
         inspetoria = u.usuario_inspetoria.inspetoria
         obj.inspetoria = inspetoria
 
