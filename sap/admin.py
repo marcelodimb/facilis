@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
+from django.contrib.admin.templatetags.admin_modify import *
+from django.contrib.admin.templatetags.admin_modify import submit_row as original_submit_row
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
+from django.db.models import Q
 from .models import Assunto, Exigencia, GrupoTrabalho, GrupoTrabalhoAuditor, Inspetoria, Procedimento, Situacao, Usuario_Inspetoria
 from .forms import ExigenciaForm, GrupoTrabalhoAuditorForm, ProcedimentoForm
 
@@ -35,11 +38,14 @@ class ExigenciaInline(admin.StackedInline):
     def get_fieldsets(self, request, obj=None):
         def if_editing(*args):
             if "atendida" in args:
-                try:
-                    obj = Exigencia.objects.get(procedimento=int(request.path.split('/')[4]))
-                except:
-                    obj = False
-                    pass
+                if obj:
+                    r = False
+
+                    # Checa se existe alguma exigencia para o procedimento atual e exibe o campo de atendida
+                    if Exigencia.objects.filter(procedimento=int(request.path.split('/')[4])).exists():
+                        r = True
+
+                    return args if r else ()
 
             return args if obj else ()
         return (
@@ -72,6 +78,38 @@ class GrupoTrabalhoAdmin(admin.ModelAdmin):
     ordering = ['nome']
     search_fields = ['nome']
     inlines = (GrupoTrabalhoAuditorInline,)
+
+
+class AuditorResponsavelListFilter(admin.SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = 'Auditor Responsável'
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'auditor_responsavel_id'
+
+    def lookups(self, request, model_admin):
+        user = User.objects.get(username=request.user.username)
+        inspetoria = user.usuario_inspetoria.inspetoria
+
+        # Pega o objeto referente ao grupo de Auditores(id=1)
+        group = Group.objects.get(id=1)
+
+        # Retorna a lista com os nomes dos membros do grupo
+        auditores = group.user_set.all().filter(usuario_inspetoria__inspetoria=inspetoria.id).order_by('first_name', 'last_name', 'username')
+
+        list = []
+
+        for a in auditores:
+            list.append((a.id, a.get_full_name()))
+
+        return list
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(auditor_responsavel_id=self.value())
+
+        return queryset
 
 
 class ProcedimentoAdmin(admin.ModelAdmin):
@@ -114,9 +152,9 @@ class ProcedimentoAdmin(admin.ModelAdmin):
                 )
             }),
         )
-    list_display = ('display_id', 'nome_parte', 'auditor_responsavel', 'situacao', 'display_criado_em',)
-    list_display_links = ('display_id', 'nome_parte', 'auditor_responsavel', 'situacao', 'display_criado_em',)
-    list_filter = ('criado_em', 'modificado_em', 'situacao',)
+    list_display = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'situacao', 'display_criado_em',)
+    list_display_links = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'situacao', 'display_criado_em',)
+    list_filter = ('criado_em', 'modificado_em', 'situacao', AuditorResponsavelListFilter,)
     ordering = ('-id', 'nome_parte', 'auditor_responsavel', 'situacao', '-criado_em',)
     search_fields = ('nome_parte',)
     inlines = (ExigenciaInline,)
@@ -159,12 +197,18 @@ class ProcedimentoAdmin(admin.ModelAdmin):
 
             return has_conteudo or (initial_forms > deleted_exigencias)
 
-        # Verifica se o usuario informou alguma exigencia e altera a
-        # situação para 'Em exigência' ou 'Em análise' caso contrário
+        # Verifica se o usuario informou alguma exigencia e altera a situação para 'Em exigência'
         if has_exigencia(request):
             obj.situacao = Situacao.objects.get(id=2)
         else:
-            obj.situacao = Situacao.objects.get(id=1)
+            # Verifica se o usuario solicitou concluir o procedimento ou não
+            if 'situacao' in request.POST:
+                if int(request.POST['situacao']) == 3:
+                    obj.situacao = Situacao.objects.get(id=3)
+                else:
+                    obj.situacao = Situacao.objects.get(id=1)
+            else:
+                obj.situacao = Situacao.objects.get(id=1)
 
         u = User.objects.get(username=request.user.username)
         inspetoria = u.usuario_inspetoria.inspetoria
@@ -175,30 +219,83 @@ class ProcedimentoAdmin(admin.ModelAdmin):
         obj.modificado_por = request.user
         obj.save()
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        u = User.objects.get(username=request.user.username)
-        inspetoria = u.usuario_inspetoria.inspetoria
+    @register.inclusion_tag('admin/submit_line.html', takes_context=True)
+    def submit_row(context):
+        ctx = original_submit_row(context)
+        ctx.update({
+            'readonly': context.get('readonly') or False,
+        })
+        return ctx
 
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+
+        try:
+            # Torna o formulário apenas para leitura caso a situação do procedimento esteja 'Concluído'
+            p = Procedimento.objects.get(id=object_id)
+            situacao = p.situacao_id
+
+            if situacao == 3:
+                extra_context['readonly'] = True
+        except:
+            pass
+
+        return super(ProcedimentoAdmin, self).change_view(request, object_id, form_url, extra_context=extra_context)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'auditor_responsavel':
+            # Usuário logado
+            u = User.objects.get(username=request.user.username)
+
+            # Inspetoria do usuário atual
+            inspetoria = u.usuario_inspetoria.inspetoria
+
             try:
-                # Pega o objeto referente ao grupo de Auditores(id=1)
+                # Pega o objeto referente ao grupo de auditores(id=1)
                 group = Group.objects.get(id=1)
 
-                # Retorna a lista com os nomes dos membros do grupo
+                # Retorna apenas a lista de auditores da inspetoria do usuário logado
                 kwargs["queryset"] = group.user_set.all().filter(usuario_inspetoria__inspetoria=inspetoria.id).order_by('first_name', 'last_name', 'username')
             except:
                 pass
 
+            field = super(ProcedimentoAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+            # Formata o nome de exibição para o nome completo ao invés do username
+            field.label_from_instance = self.get_user_label
+
+            return field
+
         if db_field.name == 'situacao':
             try:
-                Procedimento.objects.get(id=int(request.path.split('/')[4]))
-                kwargs["queryset"] = Situacao.objects.all()
+                p = Procedimento.objects.get(id=int(request.path.split('/')[4]))
+
+                situacao_id = p.situacao_id
+
+                # Define as possiveis situacoes a serem exibidas
+                # Se o procedimento está 'Em análise', exibir apenas
+                # 'Em análise'(id=1) e 'Concluído'(id=3)
+                if situacao_id == 1:
+                    kwargs["queryset"] = Situacao.objects.filter(Q(id=1) | Q(id=3))
+
+                # Se o procedimento está 'Em exigência', exibir apenas
+                # 'Em exigência'(id=2) e 'Concluído'(id=3)
+                elif situacao_id == 2:
+                    kwargs["queryset"] = Situacao.objects.filter(Q(id=2) | Q(id=3))
+
+                # Se o procedimento está 'Concluído', exibir apenas 'Concluído'(id=3)
+                else:
+                    kwargs["queryset"] = Situacao.objects.filter(id=3)
+
             except:
                 # Define a situação como 'Em análise'(id=1)
                 kwargs["queryset"] = Situacao.objects.filter(id=1)
                 pass
 
         return super(ProcedimentoAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_user_label(self, user):
+        return user.get_full_name()
 
     def get_form(self, request, obj=None, **kwargs):
         ProcedimentoForm = super(ProcedimentoAdmin, self).get_form(request, obj, **kwargs)

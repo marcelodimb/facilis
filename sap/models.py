@@ -58,6 +58,16 @@ class Procedimento(models.Model):
     def display_id(self):
         return "{0:06d}".format(self.id)
 
+    def display_auditor_responsavel(self):
+        auditor_responsavel = ""
+        try:
+            u = User.objects.get(username=self.auditor_responsavel)
+            auditor_responsavel = u.get_full_name()
+        except:
+            pass
+
+        return auditor_responsavel
+
     class Meta:
         verbose_name_plural = "procedimentos"
 
@@ -66,6 +76,9 @@ class Procedimento(models.Model):
 
     display_criado_em.admin_order_field = 'criado_em'
     display_criado_em.short_description = 'Data de abertura'
+
+    display_auditor_responsavel.admin_order_field = 'auditor_responsavel'
+    display_auditor_responsavel.short_description = 'Auditor responsável'
 
 
 class Exigencia(models.Model):

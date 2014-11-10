@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django import forms
 from django.contrib.auth.models import Group
 from django.forms import ModelForm, ModelChoiceField, Select, TextInput
 from suit.widgets import AutosizedTextarea
@@ -36,6 +37,19 @@ class ProcedimentoForm(ModelForm):
             'tipo_documento_conteudo': TextInput(attrs={'class': 'input-medium'}),
             'observacoes': AutosizedTextarea(attrs={'rows': 3, 'class': 'input-xxlarge'})
         }
+
+    def clean(self):
+        cleaned_data = super(ProcedimentoForm, self).clean()
+        tipo_documento = cleaned_data.get("tipo_documento")
+        tipo_documento_conteudo = cleaned_data.get("tipo_documento_conteudo")
+
+        if tipo_documento:
+            if int(tipo_documento) == 1 and not tipo_documento_conteudo:
+                raise forms.ValidationError("CPF inválido.")
+            elif int(tipo_documento) == 2 and not tipo_documento_conteudo:
+                raise forms.ValidationError("CNPJ inválido.")
+
+        return self.cleaned_data
 
 
 class ExigenciaForm(ModelForm):
