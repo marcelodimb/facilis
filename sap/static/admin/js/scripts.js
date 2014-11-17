@@ -1,7 +1,7 @@
 $(function () {
     // Cria as mascaras para os campos de telefones e para os CPF e CNPJ
-    $('#id_telefone_fixo').mask('(00)0000-0000', {placeholder: "(__)____-____", clearIfNotMatch: true});
-    $('#id_telefone_celular').mask('(00)00000-0000', {placeholder: "(__)_____-____", clearIfNotMatch: true});
+    $('#id_telefone_fixo').mask('(00) 0000-0000', {placeholder: "(__) ____-____", clearIfNotMatch: true});
+    $('#id_telefone_celular').mask('(00) 00000-0000', {placeholder: "(__) _____-____", clearIfNotMatch: true});
     $('#id_tipo_documento').on('change', function (){
         if(parseInt($(this).val()) === 1) {
             $('#id_tipo_documento_conteudo').mask('000.000.000-00', {placeholder: "___.___.___-__", clearIfNotMatch: true});

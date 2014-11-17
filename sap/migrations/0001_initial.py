@@ -34,8 +34,8 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('nome_parte', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
             ('email', self.gf('django.db.models.fields.EmailField')(max_length=128, unique=True, null=True, blank=True)),
-            ('telefone_fixo', self.gf('django.db.models.fields.CharField')(max_length=13, null=True, blank=True)),
-            ('telefone_celular', self.gf('django.db.models.fields.CharField')(max_length=14, null=True, blank=True)),
+            ('telefone_fixo', self.gf('django.db.models.fields.CharField')(max_length=14, null=True, blank=True)),
+            ('telefone_celular', self.gf('django.db.models.fields.CharField')(max_length=15, null=True, blank=True)),
             ('tipo_documento', self.gf('django.db.models.fields.IntegerField')(max_length=1)),
             ('tipo_documento_conteudo', self.gf('django.db.models.fields.CharField')(max_length=18)),
             ('assunto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Assunto'])),
@@ -55,7 +55,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('procedimento', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Procedimento'])),
             ('conteudo', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('atendida', self.gf('django.db.models.fields.BooleanField')()),
+            ('atendida', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal(u'sap', ['Exigencia'])
 
@@ -71,7 +71,7 @@ class Migration(SchemaMigration):
         db.create_table(u'sap_grupotrabalho', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('nome', self.gf('django.db.models.fields.CharField')(unique=True, max_length=128)),
-            ('assunto', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Assunto'])),
+            ('assunto', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['sap.Assunto'], unique=True)),
         ))
         db.send_create_signal(u'sap', ['GrupoTrabalho'])
 
@@ -154,14 +154,14 @@ class Migration(SchemaMigration):
         },
         u'sap.exigencia': {
             'Meta': {'object_name': 'Exigencia'},
-            'atendida': ('django.db.models.fields.BooleanField', [], {}),
+            'atendida': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'conteudo': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'procedimento': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Procedimento']"})
         },
         u'sap.grupotrabalho': {
             'Meta': {'object_name': 'GrupoTrabalho'},
-            'assunto': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Assunto']"}),
+            'assunto': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['sap.Assunto']", 'unique': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'})
         },
@@ -190,8 +190,8 @@ class Migration(SchemaMigration):
             'nome_parte': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '128'}),
             'observacoes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'situacao': ('django.db.models.fields.related.ForeignKey', [], {'default': '1', 'to': u"orm['sap.Situacao']"}),
-            'telefone_celular': ('django.db.models.fields.CharField', [], {'max_length': '14', 'null': 'True', 'blank': 'True'}),
-            'telefone_fixo': ('django.db.models.fields.CharField', [], {'max_length': '13', 'null': 'True', 'blank': 'True'}),
+            'telefone_celular': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
+            'telefone_fixo': ('django.db.models.fields.CharField', [], {'max_length': '14', 'null': 'True', 'blank': 'True'}),
             'tipo_documento': ('django.db.models.fields.IntegerField', [], {'max_length': '1'}),
             'tipo_documento_conteudo': ('django.db.models.fields.CharField', [], {'max_length': '18'})
         },

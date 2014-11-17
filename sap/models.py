@@ -35,8 +35,8 @@ class Situacao(models.Model):
 class Procedimento(models.Model):
     nome_parte = models.CharField(max_length=128, unique=True, verbose_name="Nome da parte")
     email = models.EmailField(max_length=128, unique=True, null=True, blank=True)
-    telefone_fixo = models.CharField(max_length=13, null=True, blank=True, help_text="Informe apenas números")
-    telefone_celular = models.CharField(max_length=14, null=True, blank=True, help_text="Informe apenas números")
+    telefone_fixo = models.CharField(max_length=14, null=True, blank=True, help_text="Informe apenas números")
+    telefone_celular = models.CharField(max_length=15, null=True, blank=True, help_text="Informe apenas números")
     tipo_documento = models.IntegerField(max_length=1, verbose_name="Tipo de documento")
     tipo_documento_conteudo = models.CharField(max_length=18, verbose_name="", help_text="Informe apenas números")
     assunto = models.ForeignKey(Assunto)
@@ -101,7 +101,7 @@ class Usuario_Inspetoria(models.Model):
 
 class GrupoTrabalho(models.Model):
     nome = models.CharField(max_length=128, unique=True)
-    assunto = models.ForeignKey(Assunto)
+    assunto = models.OneToOneField(Assunto)
 
     def __unicode__(self):
         return self.nome
