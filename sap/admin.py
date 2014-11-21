@@ -5,9 +5,117 @@ from django.contrib.admin.templatetags.admin_modify import submit_row as origina
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.db.models import Q
+
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+
 from .models import Assunto, Exigencia, GrupoTrabalho, GrupoTrabalhoAuditor, Inspetoria, Procedimento, Situacao, Usuario_Inspetoria
 from .forms import ExigenciaForm, GrupoTrabalhoAuditorForm, ProcedimentoForm
 
+
+# Funcao de gerar um arquivo PDF contendo os dados do procedimento solicitado
+def print_procedimento(self, request, queryset):
+    # Verifica se foram selecionados mais de 1 procedimento
+    if len(queryset) > 1:
+        self.message_user(request, "Selecione apenas 1 procedimento.")
+    else:
+        doc = SimpleDocTemplate("simple_table.pdf", pagesize=A4)
+
+        style_sheet = getSampleStyleSheet()
+        style_sheet.add(ParagraphStyle(
+            name='title_style',
+            leading=24,
+            fontSize=12,
+            spaceBefore=24
+        ))
+        style_sheet.add(ParagraphStyle(
+            name='paragraph_procedimento',
+            fontSize=8
+        ))
+        style_sheet.add(ParagraphStyle(
+            name='paragraph_exigencias',
+            fontSize=8,
+            bulletFontName='Helvetica',
+            bulletFontSize=8,
+            bulletIndent=5
+        ))
+
+        # Container para os elementos flutuantes
+        elements = []
+
+        title_report = Paragraph('Serviço de Acompanhamento de processos', style_sheet["title_style"])
+        elements.append(title_report)
+
+        # Recupera o procedimento solicitado
+        nome_parte = queryset[0].nome_parte
+        codigo = "{0:06d}".format(queryset[0].id)
+        email = queryset[0].email or "-"
+        telefone_fixo = queryset[0].telefone_fixo or "-"
+        telefone_celular = queryset[0].telefone_celular or "-"
+        tipo_documento = 'CPF' if queryset[0].tipo_documento == 1 else 'CNPJ'
+        tipo_documento_conteudo = queryset[0].tipo_documento_conteudo
+        assunto = str(queryset[0].assunto)
+        situacao = str(queryset[0].situacao)
+        auditor_responsavel = queryset[0].auditor_responsavel.get_full_name()
+        observacoes = queryset[0].observacoes or "-"
+        criado_em = queryset[0].criado_em.strftime('%d/%m/%Y - %H:%M')
+        criado_por = queryset[0].criado_por.get_full_name()
+        modificado_em = queryset[0].modificado_em.strftime('%d/%m/%Y - %H:%M')
+        modificado_por = queryset[0].modificado_por.get_full_name()
+
+        data_procedimento = [
+            ['Nome da parte:', nome_parte],
+            ['Código:', codigo],
+            ['E-mail:', email],
+            ['Telefone fixo:', telefone_fixo],
+            ['Telefone celular:', telefone_celular],
+            [tipo_documento + ':', tipo_documento_conteudo],
+            ['Assunto:', assunto],
+            ['Situação', situacao],
+            ['Auditor responsável:', auditor_responsavel],
+            ['Criado em:', criado_em],
+            ['Criado por:', criado_por],
+            ['Modificado em:', modificado_em],
+            ['Modificado por:', modificado_por],
+            ['Observações:', Paragraph(observacoes, style_sheet["paragraph_procedimento"])]
+        ]
+        table_procedimento=Table(data_procedimento, colWidths=(None, 400))
+        table_procedimento.setStyle(TableStyle([
+            ('FONT',(0,0),(0,-1), 'Helvetica-Bold', 8),
+            ('ALIGN',(0,0),(0,-1), 'RIGHT'),
+            ('VALIGN',(0,0),(0,-1), 'TOP'),
+            ('FONT',(1,0),(-1,-1), 'Helvetica', 8)
+        ]))
+        elements.append(table_procedimento)
+
+        title_exigencias = Paragraph('Exigências', style_sheet["title_style"])
+        elements.append(title_exigencias)
+
+        # Recupera as exigencias do procedimento solicitado
+        exigencias = Exigencia.objects.filter(procedimento=queryset[0].id)
+
+        if exigencias:
+            data_exigencias = []
+
+            for exigencia in exigencias:
+                data_exigencias.append(
+                    [Paragraph(exigencia.conteudo, style_sheet["paragraph_exigencias"], bulletText='*'), 'Atendida' if exigencia.atendida else 'Não atendida']
+                )
+            table_exigencias=Table(data_exigencias, colWidths=(390, None))
+            table_exigencias.setStyle(TableStyle([
+                ('FONT',(0,0),(0,-1), 'Helvetica', 8),
+                ('VALIGN',(0,0),(0,-1), 'TOP'),
+                ('FONT',(1,0),(-1,-1), 'Helvetica', 8)
+            ]))
+            elements.append(table_exigencias)
+        else:
+            elements.append(Paragraph('Este procedimento não possui exigências.', style_sheet["paragraph_exigencias"]))
+
+        # write the document to disk
+        doc.build(elements)
+
+print_procedimento.short_description = "Imprimir procedimento selecionado"
 
 class AssuntoAdmin(admin.ModelAdmin):
     list_display = ('nome',)
@@ -152,12 +260,13 @@ class ProcedimentoAdmin(admin.ModelAdmin):
                 )
             }),
         )
+    actions = (print_procedimento,)
+    inlines = (ExigenciaInline,)
     list_display = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'situacao', 'display_criado_em',)
     list_display_links = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'situacao', 'display_criado_em',)
     list_filter = ('criado_em', 'modificado_em', 'situacao', AuditorResponsavelListFilter,)
     ordering = ('-id', 'nome_parte', 'auditor_responsavel', 'situacao', '-criado_em',)
     search_fields = ('nome_parte',)
-    inlines = (ExigenciaInline,)
 
     class Media:
         js = (
