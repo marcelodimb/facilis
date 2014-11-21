@@ -5,10 +5,13 @@ from django.contrib.admin.templatetags.admin_modify import submit_row as origina
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
 from django.db.models import Q
+from django.http import HttpResponse
+from io import BytesIO
+from time import gmtime, strftime
 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.pagesizes import A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 from .models import Assunto, Exigencia, GrupoTrabalho, GrupoTrabalhoAuditor, Inspetoria, Procedimento, Situacao, Usuario_Inspetoria
 from .forms import ExigenciaForm, GrupoTrabalhoAuditorForm, ProcedimentoForm
@@ -20,24 +23,35 @@ def print_procedimento(self, request, queryset):
     if len(queryset) > 1:
         self.message_user(request, "Selecione apenas 1 procedimento.")
     else:
-        doc = SimpleDocTemplate("simple_table.pdf", pagesize=A4)
+        # Codigo do procedimento solicitado
+        codigo = "{0:06d}".format(queryset[0].id)
+
+        response = HttpResponse(mimetype='application/pdf')
+
+        # Define o nome do pdf como juncao da palavra procedimento com o seu codigo mais a hora em que foi gerado
+        pdf_name = "procedimento-" + codigo + "-" + strftime("%H_%M_%S-%d_%m_%Y", gmtime()) + ".pdf"
+        response['Content-Disposition'] = 'attachment; filename=%s' % pdf_name
+
+        buffer = BytesIO()
+
+        #doc = SimpleDocTemplate("simple_table.pdf", pagesize=A4)
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
 
         style_sheet = getSampleStyleSheet()
         style_sheet.add(ParagraphStyle(
             name='title_style',
-            leading=24,
-            fontSize=12,
-            spaceBefore=24
+            fontSize=14,
+            leading=24
         ))
         style_sheet.add(ParagraphStyle(
             name='paragraph_procedimento',
-            fontSize=8
+            fontSize=10
         ))
         style_sheet.add(ParagraphStyle(
             name='paragraph_exigencias',
-            fontSize=8,
+            fontSize=10,
             bulletFontName='Helvetica',
-            bulletFontSize=8,
+            bulletFontSize=10,
             bulletIndent=5
         ))
 
@@ -49,7 +63,6 @@ def print_procedimento(self, request, queryset):
 
         # Recupera o procedimento solicitado
         nome_parte = queryset[0].nome_parte
-        codigo = "{0:06d}".format(queryset[0].id)
         email = queryset[0].email or "-"
         telefone_fixo = queryset[0].telefone_fixo or "-"
         telefone_celular = queryset[0].telefone_celular or "-"
@@ -82,14 +95,15 @@ def print_procedimento(self, request, queryset):
         ]
         table_procedimento=Table(data_procedimento, colWidths=(None, 400))
         table_procedimento.setStyle(TableStyle([
-            ('FONT',(0,0),(0,-1), 'Helvetica-Bold', 8),
+            ('FONT',(0,0),(0,-1), 'Helvetica-Bold', 10),
             ('ALIGN',(0,0),(0,-1), 'RIGHT'),
             ('VALIGN',(0,0),(0,-1), 'TOP'),
-            ('FONT',(1,0),(-1,-1), 'Helvetica', 8)
+            ('FONT',(1,0),(-1,-1), 'Helvetica', 10)
         ]))
         elements.append(table_procedimento)
 
         title_exigencias = Paragraph('Exigências', style_sheet["title_style"])
+        elements.append(Spacer(1, 40))
         elements.append(title_exigencias)
 
         # Recupera as exigencias do procedimento solicitado
@@ -104,16 +118,22 @@ def print_procedimento(self, request, queryset):
                 )
             table_exigencias=Table(data_exigencias, colWidths=(390, None))
             table_exigencias.setStyle(TableStyle([
-                ('FONT',(0,0),(0,-1), 'Helvetica', 8),
+                ('FONT',(0,0),(0,-1), 'Helvetica', 10),
                 ('VALIGN',(0,0),(0,-1), 'TOP'),
-                ('FONT',(1,0),(-1,-1), 'Helvetica', 8)
+                ('FONT',(1,0),(-1,-1), 'Helvetica', 10)
             ]))
             elements.append(table_exigencias)
         else:
             elements.append(Paragraph('Este procedimento não possui exigências.', style_sheet["paragraph_exigencias"]))
 
         # write the document to disk
+        #doc.build(elements)
+
         doc.build(elements)
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+        return response
 
 print_procedimento.short_description = "Imprimir procedimento selecionado"
 
