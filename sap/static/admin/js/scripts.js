@@ -14,6 +14,24 @@ $(function () {
         $('#id_tipo_documento_conteudo').focus();
     });
 
+    $('#id_assunto').on('change', function (){
+        var assunto_id = $(this).val();
+
+        $.ajax({
+            url: "/set_auditor_responsavel/",
+            type: "post",
+            datatype:"jsonp",
+            data: {'assunto_id': assunto_id},
+            success: function(response){
+                var e = $('#id_auditor_responsavel');
+
+                if(response) {
+                    e.html(response);
+                }
+            }
+        });
+    });
+
     Suit.after_inline.register('my_unique_func_name', function(inline_prefix, row){
         // Trata do evento de adicionar exigências
         if (inline_prefix === 'exigencia_set') {

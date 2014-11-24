@@ -58,7 +58,7 @@ def print_procedimento(self, request, queryset):
         # Container para os elementos flutuantes
         elements = []
 
-        title_report = Paragraph('Serviço de Acompanhamento de processos', style_sheet["title_style"])
+        title_report = Paragraph('Serviço de Acompanhamento de Procedimentos', style_sheet["title_style"])
         elements.append(title_report)
 
         # Recupera o procedimento solicitado
@@ -201,10 +201,10 @@ class GrupoTrabalhoAuditorInline(admin.StackedInline):
 
 
 class GrupoTrabalhoAdmin(admin.ModelAdmin):
-    list_display = ['nome']
-    list_display_links = ['nome']
-    ordering = ['nome']
-    search_fields = ['nome']
+    list_display = ['nome', 'assunto']
+    list_display_links = ['nome', 'assunto']
+    ordering = ['nome', 'assunto']
+    search_fields = ['nome', 'assunto']
     inlines = (GrupoTrabalhoAuditorInline,)
 
 
@@ -306,25 +306,33 @@ class ProcedimentoAdmin(admin.ModelAdmin):
 
             return qs.filter(inspetoria=inspetoria)
 
-    # Redefine o método de salvar para incluir o usuario que atualizou o último procedimento
+    # Redefine o metodo de salvar para incluir o usuario que atualizou o ultimo procedimento
     def save_model(self, request, obj, form, change):
         def has_exigencia(request):
+            print request.POST
+
             has_conteudo = False
-            deleted_exigencias = 0
+            exigencias_deletadas = exigencias_atendidas = 0
             initial_forms = int(request.POST['exigencia_set-INITIAL_FORMS'])
             total_forms   = int(request.POST['exigencia_set-TOTAL_FORMS'])
 
-            # Checa quantos elementos foram solicitados para serem apagados
+            # Checa quantos elementos foram solicitados para serem apagados e atendidos
             for i in range(initial_forms):
                 if ("exigencia_set-%s-DELETE" % i) in request.POST:
-                    deleted_exigencias += 1
+                    exigencias_deletadas += 1
 
-            # Checa se o conteudo de alguma exigência está vazia
+                if ("exigencia_set-%s-atendida" % i) in request.POST:
+                    exigencias_atendidas += 1
+
+            # Checa se o conteudo de alguma exigencia esta vazia
             for i in range(initial_forms, total_forms):
                 if request.POST[("exigencia_set-%s-conteudo" % i)] != '':
                     has_conteudo = True
 
-            return has_conteudo or (initial_forms > deleted_exigencias)
+            # Retorna True se o usuario criou alguma exigencia com conteudo nao vazio ou se a quantidade
+            # de exigencias a serem deletadas e' menor que o total de exigencias inicial e se a quantidade de
+            # exigencias a serem atendidas e' menor que o numero exigencias que terminou no form
+            return has_conteudo or (initial_forms > exigencias_deletadas and total_forms > exigencias_atendidas)
 
         # Verifica se o usuario informou alguma exigencia e altera a situação para 'Em exigência'
         if has_exigencia(request):

@@ -85,6 +85,8 @@ class Exigencia(models.Model):
     procedimento = models.ForeignKey(Procedimento)
     conteudo = models.TextField(null=True, blank=True, verbose_name="Conteúdo")
     atendida = models.BooleanField(blank=True, default=False)
+    criado_em = models.DateTimeField(auto_now_add=True, editable=False, null=True)
+    modificado_em = models.DateTimeField(auto_now=True, editable=False, null=True)
 
     def __unicode__(self):
         return self.conteudo
@@ -101,7 +103,7 @@ class Usuario_Inspetoria(models.Model):
 
 class GrupoTrabalho(models.Model):
     nome = models.CharField(max_length=128, unique=True)
-    assunto = models.OneToOneField(Assunto)
+    assunto = models.OneToOneField(Assunto, unique=True)
 
     def __unicode__(self):
         return self.nome
@@ -116,7 +118,7 @@ class GrupoTrabalhoAuditor(models.Model):
     auditor = models.ForeignKey(User)
 
     def __unicode__(self):
-        return self.grupo_trabalho
+        return str(self.auditor)
 
     class Meta:
         verbose_name="Auditor do grupo de trabalho"

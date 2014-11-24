@@ -56,6 +56,8 @@ class Migration(SchemaMigration):
             ('procedimento', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sap.Procedimento'])),
             ('conteudo', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('atendida', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('criado_em', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, null=True, blank=True)),
+            ('modificado_em', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, null=True, blank=True)),
         ))
         db.send_create_signal(u'sap', ['Exigencia'])
 
@@ -156,7 +158,9 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Exigencia'},
             'atendida': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'conteudo': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'criado_em': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'modificado_em': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'null': 'True', 'blank': 'True'}),
             'procedimento': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['sap.Procedimento']"})
         },
         u'sap.grupotrabalho': {

@@ -1,6 +1,7 @@
 Django==1.6.7
+Pillow==2.6.1
 South==1.0
 argparse==1.2.1
-distribute==0.6.24
 django-suit==0.2.11
+reportlab==3.1.8
 wsgiref==0.1.2
