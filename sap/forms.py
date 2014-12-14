@@ -55,7 +55,7 @@ class ProcedimentoForm(ModelForm):
                 raise forms.ValidationError("Telefone celular inválido.")
 
         if tipo_documento:
-            if tipo_documento in range(1,2):
+            if tipo_documento in range(1,3):
                 if int(tipo_documento) == 1 and not Validate().validate_cpf(tipo_documento_conteudo):
                     raise forms.ValidationError("CPF inválido.")
                 elif int(tipo_documento) == 2 and not Validate().validate_cnpj(tipo_documento_conteudo):

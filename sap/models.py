@@ -56,7 +56,7 @@ class Procedimento(models.Model):
         return self.criado_em.strftime('%d/%m/%Y - %H:%M')
 
     def display_id(self):
-        return "{0:06d}".format(self.id)
+        return "{0:07d}".format(self.id)
 
     def display_auditor_responsavel(self):
         auditor_responsavel = ""

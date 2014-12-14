@@ -24,7 +24,7 @@ def print_procedimento(self, request, queryset):
         self.message_user(request, "Selecione apenas 1 procedimento.")
     else:
         # Codigo do procedimento solicitado
-        codigo = "{0:06d}".format(queryset[0].id)
+        codigo = "{0:07d}".format(queryset[0].id)
 
         response = HttpResponse(mimetype='application/pdf')
 

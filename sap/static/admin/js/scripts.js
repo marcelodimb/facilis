@@ -32,6 +32,9 @@ $(function () {
         });
     });
 
+    // Remove o titulo de cada exigencia no fieldset
+    $('#exigencia_set-group').find('.inline_label').hide();
+
     Suit.after_inline.register('my_unique_func_name', function(inline_prefix, row){
         // Trata do evento de adicionar exigências
         if (inline_prefix === 'exigencia_set') {
