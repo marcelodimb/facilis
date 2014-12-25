@@ -15,11 +15,15 @@ class Validate:
         return bool(re.match('\(\d{2}\) \d{4}-\d{4}', str))
 
     # Validador de telefone celular
+    # Celular pode ser de 8 ou 9 digitos mais codigo de operadora e espacos
     def validate_telefone_celular(self, str):
-        if len(str) != 15:
-            return False
+        if len(str) == 14:
+            return bool(re.match('\(\d{2}\) \d{5}-\d{3}', str))
 
-        return bool(re.match('\(\d{2}\) \d{5}-\d{4}', str))
+        if len(str) == 15:
+            return bool(re.match('\(\d{2}\) \d{5}-\d{4}', str))
+
+        return False
 
     # Validador de CPF
     def validate_cpf(self, cpf):

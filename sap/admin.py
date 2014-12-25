@@ -284,8 +284,8 @@ class ProcedimentoAdmin(admin.ModelAdmin):
     inlines = (ExigenciaInline,)
     list_display = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'situacao', 'display_criado_em',)
     list_display_links = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'situacao', 'display_criado_em',)
-    list_filter = ('criado_em', 'modificado_em', 'situacao', AuditorResponsavelListFilter,)
-    ordering = ('-id', 'nome_parte', 'auditor_responsavel', 'situacao', '-criado_em',)
+    list_filter = ('modificado_em', 'situacao', AuditorResponsavelListFilter,)
+    ordering = ( '-modificado_em', 'nome_parte', 'auditor_responsavel', 'inspetoria', 'situacao',)
     search_fields = ('nome_parte',)
 
     class Media:
@@ -378,6 +378,14 @@ class ProcedimentoAdmin(admin.ModelAdmin):
             pass
 
         return super(ProcedimentoAdmin, self).change_view(request, object_id, form_url, extra_context=extra_context)
+
+    def changelist_view(self, request, extra_context=None):
+
+        if request.user.is_superuser:
+            self.list_display = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'inspetoria', 'situacao', 'display_criado_em',)
+            self.list_display_links = ('display_id', 'nome_parte', 'display_auditor_responsavel', 'inspetoria', 'situacao', 'display_criado_em',)
+            self.list_filter = ('modificado_em', 'inspetoria', 'situacao', AuditorResponsavelListFilter,)
+        return super(ProcedimentoAdmin, self).changelist_view(request, extra_context)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'auditor_responsavel':
