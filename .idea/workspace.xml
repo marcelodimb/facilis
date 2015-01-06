@@ -6,9 +6,7 @@
       <change type="DELETED" beforePath="C:\Users\marcelo\precise32\www\facilis\simple_table.pdf" afterPath="" />
       <change type="DELETED" beforePath="C:\Users\marcelo\precise32\www\facilis\storage.db" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sap/admin.py" afterPath="$PROJECT_DIR$/sap/admin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sap/static/admin/js/scripts.js" afterPath="$PROJECT_DIR$/sap/static/admin/js/scripts.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/facilis/settings.py" afterPath="$PROJECT_DIR$/facilis/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sap/validate.py" afterPath="$PROJECT_DIR$/sap/validate.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sap/models.py" afterPath="$PROJECT_DIR$/sap/models.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="facilis.iws" />
@@ -36,11 +34,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="settings.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/facilis/settings.py">
+      <file leaf-file-name="admin.py" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/sap/admin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.2715655" vertical-offset="272" max-vertical-offset="1581">
-              <caret line="12" column="18" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
+            <state vertical-scroll-proportion="0.39333335" vertical-offset="69" max-vertical-offset="7905">
+              <caret line="26" column="23" selection-start-line="26" selection-start-column="23" selection-end-line="26" selection-end-column="23" />
               <folding />
             </state>
           </provider>
@@ -74,13 +72,13 @@
         <option value="$PROJECT_DIR$/facilis/urls.py" />
         <option value="$PROJECT_DIR$/sap/urls.py" />
         <option value="$PROJECT_DIR$/sap/views.py" />
-        <option value="$PROJECT_DIR$/sap/models.py" />
         <option value="$PROJECT_DIR$/sap/forms.py" />
         <option value="$PROJECT_DIR$/templates/admin/edit_inline/stacked.html" />
         <option value="$PROJECT_DIR$/sap/static/admin/js/scripts.js" />
         <option value="$PROJECT_DIR$/sap/validate.py" />
-        <option value="$PROJECT_DIR$/sap/admin.py" />
         <option value="$PROJECT_DIR$/facilis/settings.py" />
+        <option value="$PROJECT_DIR$/sap/models.py" />
+        <option value="$PROJECT_DIR$/sap/admin.py" />
       </list>
     </option>
   </component>
@@ -462,7 +460,7 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32903227" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26132685" sideWeight="0.65967745" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26941746" sideWeight="0.65967745" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.2795031" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
@@ -600,7 +598,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.6020408" vertical-offset="155" max-vertical-offset="2329">
           <caret line="23" column="63" selection-start-line="23" selection-start-column="63" selection-end-line="23" selection-end-column="63" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -608,23 +605,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.6728232" vertical-offset="0" max-vertical-offset="867">
           <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sap/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.68601584" vertical-offset="5979" max-vertical-offset="7905">
-          <caret line="382" column="8" selection-start-line="382" selection-start-column="8" selection-end-line="382" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sap/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.53825855" vertical-offset="459" max-vertical-offset="2210">
-          <caret line="40" column="27" selection-start-line="40" selection-start-column="4" selection-end-line="40" selection-end-column="27" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -632,6 +612,22 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.2715655" vertical-offset="272" max-vertical-offset="1581">
           <caret line="12" column="18" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sap/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.85" vertical-offset="714" max-vertical-offset="2210">
+          <caret line="58" column="21" selection-start-line="58" selection-start-column="21" selection-end-line="58" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sap/admin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.39333335" vertical-offset="69" max-vertical-offset="7905">
+          <caret line="26" column="23" selection-start-line="26" selection-start-column="23" selection-end-line="26" selection-end-column="23" />
           <folding />
         </state>
       </provider>
